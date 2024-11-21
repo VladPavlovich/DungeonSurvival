@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Pistol : Gun
@@ -10,7 +8,7 @@ public class Pistol : Gun
         maxAmmo = 15;
         currentAmmo = maxAmmo;
         reloadTime = 1.5f;
-        fireRate = 2f;  // 2 shots per second
+        fireRate = 2f;  
         isAutomatic = false;
     }
 
@@ -20,8 +18,10 @@ public class Pistol : Gun
         {
             currentAmmo--;
             Debug.Log("Glock shot! Bullets left: " + currentAmmo);
-            UpdateNextFireTime();  // Ensure the next fire time is set
-            SpawnBullet();  // Call method to fire a bullet (capsule)
+            UpdateNextFireTime();
+            SpawnBullet();
+            ApplyRecoil(); 
+            PlayGunSound();
         }
     }
 }

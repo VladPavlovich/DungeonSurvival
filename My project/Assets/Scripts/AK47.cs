@@ -1,23 +1,23 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class AK47 : Gun
 {
+    private bool isActive = false; 
+
     private void Start()
     {
-        gunName = "AK-47";
+        gunName = "Ak 47";
         maxAmmo = 30;
         currentAmmo = maxAmmo;
         reloadTime = 2.5f;
-        fireRate = 10f;  // 10 shots per second
-        isAutomatic = true;  // Automatic firing
+        fireRate = 10f;  
+        isAutomatic = true;  
     }
 
     private void Update()
     {
-        // For automatic firing, we continuously check if the fire button is held down
-        if (Input.GetMouseButton(0))  // Left mouse button held down
+        // Check if this gun is active and isAutomatic
+        if (isActive && isAutomatic && Input.GetMouseButton(0))
         {
             Shoot();
         }
@@ -29,8 +29,15 @@ public class AK47 : Gun
         {
             currentAmmo--;
             Debug.Log("AK-47 fired! Bullets left: " + currentAmmo);
-            UpdateNextFireTime();  // Set the next time this gun can fire based on fireRate
-            SpawnBullet();  // Call method to fire a bullet
+            UpdateNextFireTime();
+            SpawnBullet();
+            ApplyRecoil();  
+            PlayGunSound();
         }
+    }
+
+    public void SetActive(bool active)
+    {
+        isActive = active;
     }
 }

@@ -6,25 +6,49 @@ public abstract class Gun : MonoBehaviour
     public int maxAmmo;
     public int currentAmmo;
     public float reloadTime;
-    public float fireRate;  // Fire rate in shots per second
+    public float fireRate;   
     public bool isAutomatic;
 
-    public GameObject bulletPrefab;  // Prefab for the bullet
-    public Transform firePoint;      // The point where bullets are fired from
+    public GameObject bulletPrefab;   
+    public Transform firePoint;       
 
-    private float nextFireTime = 0f;  // Track when the gun can fire next
+    private float nextFireTime = 0f;
+    private AudioSource audioSource;
+
+    private void Awake()
+    {
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+        {
+            Debug.LogWarning($"Gun {gunName} has no AudioSource attached! Gun sounds won't play.");
+        }
+    }
 
     public abstract void Shoot();
 
+    public virtual void Reload(int ammoToLoad)
+    {
+        if (currentAmmo < maxAmmo && ammoToLoad > 0)
+        {
+            int ammoNeeded = maxAmmo - currentAmmo;
+            int ammoToReload = Mathf.Min(ammoToLoad, ammoNeeded);
+
+            currentAmmo += ammoToReload;
+            Debug.Log($"{gunName} reloaded. Current ammo: {currentAmmo}/{maxAmmo}");
+        }
+        else
+        {
+            Debug.Log($"{gunName} is already fully loaded or no spare ammo.");
+        }
+    }
+
     protected bool CanShoot()
     {
-        // Check if we can shoot (if the current time is past the nextFireTime and we have ammo)
         return Time.time >= nextFireTime && currentAmmo > 0;
     }
 
     protected void UpdateNextFireTime()
     {
-        // Update the next fire time based on the fire rate
         nextFireTime = Time.time + 1f / fireRate;
     }
 
@@ -32,17 +56,15 @@ public abstract class Gun : MonoBehaviour
     {
         if (bulletPrefab != null && firePoint != null)
         {
-            // Instantiate the bullet at the fire point's position and rotation
-            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            GameObject bulletObject = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
 
-            // Add velocity to the bullet
-            Rigidbody rb = bullet.GetComponent<Rigidbody>();
+            Rigidbody rb = bulletObject.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.velocity = firePoint.forward * 50f;  
+                rb.velocity = firePoint.forward * 50f;
             }
 
-            Destroy(bullet, 5f); 
+            Destroy(bulletObject, 5f);
         }
         else
         {
@@ -50,5 +72,24 @@ public abstract class Gun : MonoBehaviour
         }
     }
 
+    protected void ApplyRecoil()
+    {
+        GunRecoil recoil = GetComponent<GunRecoil>();
+        if (recoil != null)
+        {
+            recoil.ApplyRecoil(); 
+        }
+        else
+        {
+            Debug.LogWarning($"Gun {gunName} has no GunRecoil component attached.");
+        }
+    }
 
+    protected void PlayGunSound()
+    {
+        if (audioSource != null)
+        {
+            audioSource.Play();
+        }
+    }
 }

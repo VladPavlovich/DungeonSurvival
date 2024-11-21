@@ -1,29 +1,20 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Shotgun : Gun
 {
-    public int pelletCount = 4;  // Number of pellets fired in a single shot
-    public float spreadAngle = 2f;  // Reduce the spread angle for a tighter spread
+    public int pelletCount = 5; 
+    public float spreadAngle = 0.05f; 
+    public float pelletSpeed = 20f; 
+    public float pelletLifetime = 5f;
 
     private void Start()
     {
         gunName = "Shotgun";
-        maxAmmo = 8;  // Typical for a shotgun
+        maxAmmo = 8; 
         currentAmmo = maxAmmo;
-        reloadTime = 3f;  // Longer reload time for the shotgun
-        fireRate = 1f;  // 1 shot per second
-        isAutomatic = false;  // Shotgun is typically not automatic
-    }
-
-    private void Update()
-    {
-        // Shotgun firing only when the left mouse button is clicked once (not automatic)
-        if (Input.GetMouseButtonDown(0))  // Left mouse button clicked
-        {
-            Shoot();
-        }
+        reloadTime = 3f; 
+        fireRate = 1f; 
+        isAutomatic = false; 
     }
 
     public override void Shoot()
@@ -32,60 +23,48 @@ public class Shotgun : Gun
         {
             currentAmmo--;
             Debug.Log("Shotgun fired! Bullets left: " + currentAmmo);
-            UpdateNextFireTime();  // Set the next fire time based on fireRate
 
-            // Fire multiple pellets in a spread pattern
-            for (int i = 0; i < pelletCount; i++)
-            {
-                SpawnPellet();  // Call a custom method to spawn each pellet
-            }
+            FirePellets();
+
+            UpdateNextFireTime(); 
+            ApplyRecoil();
+            PlayGunSound();
         }
     }
 
-    private void SpawnPellet()
+    private void FirePellets()
     {
-        if (bulletPrefab != null && firePoint != null)
+        if (bulletPrefab == null)
         {
-            // Instantiate the pellet (bullet) without any spread initially
-            GameObject pellet = Instantiate(bulletPrefab, firePoint.position, firePoint.rotation);
+            Debug.LogError("Bullet prefab is missing! Please assign a valid prefab in the Inspector.");
+            return;
+        }
 
-            // Add velocity to the pellet so that it flies straight initially
-            Rigidbody rb = pellet.GetComponent<Rigidbody>();
+        if (firePoint == null)
+        {
+            Debug.LogError("Fire point is missing! Please assign a valid fire point in the Inspector.");
+            return;
+        }
+
+        for (int i = 0; i < pelletCount; i++)
+        {
+            // Calculate random spread angles (tighter spread with reduced range)
+            float angleX = Random.Range(-spreadAngle, spreadAngle); // Vertical spread (pitch)
+            float angleY = Random.Range(-spreadAngle, spreadAngle); // Horizontal spread (yaw)
+
+            Vector3 spreadDirection = Quaternion.Euler(angleX, angleY, 0) * firePoint.forward;
+
+            GameObject bullet = Instantiate(bulletPrefab, firePoint.position, Quaternion.LookRotation(spreadDirection));
+
+            Rigidbody rb = bullet.GetComponent<Rigidbody>();
             if (rb != null)
             {
-                rb.velocity = firePoint.forward * 50f;  // Adjust pellet speed if needed
-
-                // Start a coroutine to apply spread after a delay
-                StartCoroutine(ApplyDelayedSpread(pellet, rb));
+                rb.velocity = spreadDirection * pelletSpeed; 
             }
-        }
-        else
-        {
-            Debug.LogError("Bullet prefab or fire point is missing!");
+
+            Destroy(bullet, pelletLifetime);
+
+            Debug.Log($"Spawned pellet {i + 1}/{pelletCount} with spread at {Time.time}");
         }
     }
-
-    private IEnumerator ApplyDelayedSpread(GameObject pellet, Rigidbody rb)
-    {
-        // Wait for 1 second (adjust this time to delay the spread effect)
-        yield return new WaitForSeconds(1f);
-
-        // Generate a small random angle for spread
-        float angleX = Random.Range(-spreadAngle, spreadAngle);  // Vertical (pitch) deviation
-        float angleY = Random.Range(-spreadAngle, spreadAngle);  // Horizontal (yaw) deviation
-
-        // Apply the new rotation to the pellet after the delay
-        Quaternion spreadRotation = Quaternion.Euler(pellet.transform.rotation.eulerAngles.x + angleX,
-                                                     pellet.transform.rotation.eulerAngles.y + angleY,
-                                                     pellet.transform.rotation.eulerAngles.z);
-
-        // Recalculate the velocity in the new direction
-        rb.velocity = spreadRotation * Vector3.forward * 50f;  // Maintain the same speed but change direction
-    }
-
-
-
-
-
-
 }

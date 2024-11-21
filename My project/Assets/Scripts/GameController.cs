@@ -1,52 +1,45 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using TMPro;  // Import the TMP namespace
+using TMPro;  
 
 public class PlayerController : MonoBehaviour
 {
-    public float speed = 5f;  // Player movement speed
-    public float mouseSensitivity = 1.5f;  // Reduced mouse sensitivity for slower looking around
-    public float jumpForce = 2f;  // Lower force applied when the player jumps
-    public float boostForce = 1f;  // Force applied when boosting
-    public float boostDuration = 0.5f;  // How long the boost lasts in seconds
-    public float boostCooldown = 10f;  // Boost cooldown time in seconds
-    public Transform cameraTransform;  // Reference to the player's camera
-    public TextMeshProUGUI boostTimerText;  // Reference to the TMP Text for boost timer
+    public float speed = 5f;  
+    public float mouseSensitivity = 1.5f;  
+    public float jumpForce = 2f; 
+    public float boostForce = 1f;  
+    public float boostDuration = 0.5f; 
+    public float boostCooldown = 10f;  
+    public Transform cameraTransform;  
+    public TextMeshProUGUI boostTimerText;  
 
     private CharacterController controller;
     private Vector3 velocity;
     private float gravity = -9.81f;
     private float xRotation = 0f;
-    private bool canBoost = true;  // Whether the player can use the boost
-    private float boostTimer = 0f;  // Timer to track boost recharge
-    private bool isBoosting = false;  // Track if the player is boosting
-    private float boostTimeRemaining = 0f;  // Time left for boost duration
+    private bool canBoost = true;  
+    private float boostTimer = 0f;  
+    private bool isBoosting = false; 
+    private float boostTimeRemaining = 0f;  
 
     void Start()
     {
-        // Lock the cursor to the center of the screen and hide it
         Cursor.lockState = CursorLockMode.Locked;
 
-        // Get the CharacterController component attached to the player
         controller = GetComponent<CharacterController>();
     }
 
     void Update()
     {
-        // Handle mouse look
         MouseLook();
 
-        // Handle player movement
         MovePlayer();
 
-        // Handle boost mechanism
         BoostPlayer();
 
-        // Recharge boost
         RechargeBoost();
 
-        // Update the boost timer text in the UI
         UpdateBoostTimerUI();
     }
 

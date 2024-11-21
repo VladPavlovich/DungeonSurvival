@@ -13,9 +13,10 @@ public class Aug : Gun
         maxAmmo = 30;
         currentAmmo = maxAmmo;
         reloadTime = 2f;
-        fireRate = 2f;  
-        isAutomatic = false; 
+        fireRate = 2f;
+        isAutomatic = false;
 
+    }
     public override void Shoot()
     {
         if (CanShoot() && !isBursting)

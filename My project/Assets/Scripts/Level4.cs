@@ -25,7 +25,7 @@ public class Level4 : MonoBehaviour
     {
         Debug.Log("Starting Level 4: Boss Battle with Golem");
 
-\        if (golemPrefab != null && bossSpawnPoint != null)
+        if (golemPrefab != null && bossSpawnPoint != null)
         {
             spawnedBoss = Instantiate(golemPrefab, bossSpawnPoint.position, bossSpawnPoint.rotation);
             Debug.Log("Golem boss spawned for Level 4.");
